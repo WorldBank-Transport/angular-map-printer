@@ -13,9 +13,9 @@ angular.module('mapPrinterApp')
     {
         tiles:
             default:
-                url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+                url: 'http://{s}.tiles.mapbox.com/v3/markiliffe.551ae569/{z}/{x}/{y}.png'
                 options:
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution: '&copy; TODI, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         center:
             lat: -6.81643
             lng: 39.2856
