@@ -134,6 +134,13 @@ body, html {
     margin: 10px auto;
 }
 
+#toolbox{
+    position: fixed;
+    top: 0;
+    right: 5px;
+    min-width: 20%;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   .container {
