@@ -1,0 +1,31 @@
+        <div class="row height-match-parent">
+            <div class="col-sm-9 height-match-parent">
+                <div id="map-container" ng-class="paper">
+                    <leaflet defaults="defaults"id="map"></leaflet>
+                </div>
+            </div>
+            <div class="col-sm-3 height-match-parent hidden-print" id="toolbox">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title text-info">Setup</div>
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-horizontal" ng-submit="print()">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Size</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" ng-options="paper.class as paper.name for paper in papers" ng-model="paper">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12 text-right">
+                                    <button type="submit" class="btn btn-md btn-info"><i class="glyphicon glyphicon-print"></i> Print</button>
+                                </div>
+                            </div>                    
+                        </form>  
+                    </div>                      
+                </div>
+            </div>
+        </div>
+</div>
