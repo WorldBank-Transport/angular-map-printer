@@ -8,7 +8,7 @@
  # Controller of the mapPrinterApp
 ###
 angular.module('mapPrinterApp')
-    .controller 'MainCtrl', ['$scope', 'leafletData', ($scope, leafletData) ->
+    .controller 'MainCtrl', ['$scope', 'leafletData', 'Map', ($scope, leafletData, Map) ->
         $scope.map = null
         $scope.papers =[
             {'name': 'A0', 'class': 'a0'}
@@ -27,13 +27,8 @@ angular.module('mapPrinterApp')
         $scope.paper = $scope.papers[8].class
 
         angular.extend $scope, defaults:
-            tileLayer: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            defaults:
-                scrollWheelZoom: true
-            center:
-                lat: -6.81643
-                lng: 39.2856
-                zoom: 13
+            tileLayer: Map.tileLayer
+            center: Map.center
 
         leafletData.getMap('map').then((map) ->
             $scope.map = map
