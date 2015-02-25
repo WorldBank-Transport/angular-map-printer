@@ -1,6 +1,6 @@
 This is an Javascript/[`AngularJS`](https://angularjs.org/) app for printing web maps
 
-Building the source code requires installing [`NodeJs`](http://nodejs.org/), [`npm`](https://www.npmjs.com/), [`bower`](http://bower.io/), [`grunt`](http://gruntjs.com/) and [`compass`](http://compass-style.org/) as dependancies 
+Building the source code requires [`NodeJs`](http://nodejs.org/), [`npm`](https://www.npmjs.com/), [`bower`](http://bower.io/), [`grunt`](http://gruntjs.com/) and [`compass`](http://compass-style.org/) as dependancies 
 
 To use the source code for development install the system wide dependencies then 
 
