@@ -8,8 +8,8 @@
  # Controller of the mapPrinterApp
 ###
 angular.module('mapPrinterApp')
-    .controller 'MainCtrl', ['$scope', 'leafletData', 'Map', ($scope, leafletData, Map) ->
-        $scope.map = null
+    .controller 'MainCtrl', ['$scope', '$location', 'leafletData', 'Map', ($scope, $location, leafletData, Map) ->
+        $scope.map = Map
         $scope.papers =[
             {'name': 'A0', 'class': 'a0'}
             {'name': 'A0 Landscape', 'class': 'a0-landscape'}
@@ -26,15 +26,18 @@ angular.module('mapPrinterApp')
         ]
         $scope.paper = $scope.papers[8].class
 
-        angular.extend $scope, defaults:
-            tileLayer: Map.tileLayer
+        angular.extend $scope,
+            tiles: Map.tiles.default
             center: Map.center
 
         leafletData.getMap('map').then((map) ->
-            $scope.map = map
-            $scope.map.invalidateSize()
+            map.invalidateSize()
         )
 
         $scope.print = () ->
             window.print()
+
+        $scope.$on 'centerUrlHash', (event, centerHash) ->
+            $location.search c: centerHash
+            return
     ]
