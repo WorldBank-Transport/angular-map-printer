@@ -8,7 +8,7 @@
  # Controller of the mapPrinterApp
 ###
 angular.module('mapPrinterApp')
-    .controller 'MainCtrl', ['$scope', 'L', 'leafletData', ($scope, L, leafletData) ->
+    .controller 'MainCtrl', ['$scope', 'leafletData', ($scope, leafletData) ->
         $scope.map = null
         $scope.papers =[
             {'name': 'A0', 'class': 'a0'}
