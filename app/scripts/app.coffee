@@ -20,7 +20,8 @@ angular
     'ngTouch',
     'leaflet-directive'
   ])
-  .config ($routeProvider) ->
+  .config ($routeProvider, $compileProvider) ->
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|blob):|data:image\//)
     $routeProvider
       .when '/',
         templateUrl: 'views/main.html'

@@ -11,10 +11,11 @@
         </div>
     </div>
 </div>
+
 <div class="height-match-parent hidden-print" id="toolbox">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="panel-title text-info">Setup</div>
+            <div class="panel-title text-info">Options</div>
         </div>
         <div class="panel-body">
             <form class="form-horizontal" ng-submit="print()">
@@ -29,7 +30,7 @@
                         type="button" data-toggle="collapse"
                         data-target="#advanced-options" aria-expanded="false"
                         aria-controls="advanced-options">
-                    More options
+                    More
                 </button>
                 <div class="collapse" id="advanced-options">
                     <div class="well">
@@ -37,13 +38,6 @@
                             <label class="control-label small">Map URL</label>
                             <input class="form-control input-sm" type="url"
                                 ng-model="tiles.url"
-                                ng-model-options="{ updateOn: 'blur' }"
-                                ng-keyup="cancel($event)">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Map Attribution</label>
-                            <input class="form-control input-sm" type="text"
-                                ng-model="tiles.options.attribution"
                                 ng-model-options="{ updateOn: 'blur' }"
                                 ng-keyup="cancel($event)">
                         </div>
@@ -62,14 +56,43 @@
                             <label class="control-label small">Zoom</label>
                             <input class="form-control input-sm" type="number" ng-model="center.zoom">
                         </div>
+                        <div class="form-group">
+                            <label class="control-label small">Map Attribution</label>
+                            <input class="form-control input-sm" type="text"
+                                ng-model="tiles.options.attribution"
+                                ng-model-options="{ updateOn: 'blur' }"
+                                ng-keyup="cancel($event)">
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-12 text-right">
-                        <button type="submit" class="btn btn-md btn-info"><i class="fa fa-print"></i> Print</button>
+                        <button type="submit" class="btn btn-md btn-info" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
                     </div>
                 </div>
+
             </form>
         </div>
     </div>
+</div>
+
+<!-- Print modal -->
+<div class="modal fade" id="print-preview" tabindex="-1" role="dialog" aria-labelledby="print preview">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <span class="modal-title text-info" id="print-preview-title"><strong>Preview</strong> ({{ paperName }})</span>
+        <a class="btn btn-default" download="{{ paper }}.png" ng-href="{{ snapshotURL }}" ng-show="!canvasIsLoading"><i class="fa fa-download"></i> Save as Image</a>
+        <button type="button" class="btn btn-default" ng-click="printSnapshot()" ng-show="!canvasIsLoading"><i class="fa fa-print"></i> Print</button>
+      </div>
+      <div class="modal-body">
+        <div ng-show="canvasIsLoading" class="text-center"><i class="fa fa-spinner fa-3x fa-pulse"></i></div>
+        <div id="snapshot"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" ng-show="!canvasIsLoading" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

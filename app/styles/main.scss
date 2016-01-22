@@ -142,6 +142,13 @@ body, html {
     max-width: 320px;
 }
 
+#print-preview img{
+    max-width: 100%;
+    height: auto;
+}
+#print-preview .modal-body{
+    background: #222222;
+}
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   .container {
