@@ -3,10 +3,9 @@
         <div id="map-container" ng-class="paper">
             <leaflet
                 id="map"
-                defaults="defaults"
-                center="center"
+                center="map.center"
                 url-hash-center="yes"
-                tiles="tiles">
+                tiles="map.tiles.default">
             </leaflet>
         </div>
     </div>
@@ -18,7 +17,7 @@
             <div class="panel-title text-info">Get printable map</div>
         </div>
         <div class="panel-body">
-            <form class="form-horizontal" ng-submit="print()">
+            <form class="form-horizontal">
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Size</label>
                     <div class="col-sm-9">
@@ -36,30 +35,30 @@
                     <div class="well">
                         <div class="form-group">
                             <label class="control-label small">Map URL</label>
-                            <input class="form-control input-sm" type="url"
-                                ng-model="tiles.url"
+                            <input class="form-control input-sm" type="text"
+                                ng-model="map.tiles.default.url"
                                 ng-model-options="{ updateOn: 'blur' }"
                                 ng-keyup="cancel($event)">
                         </div>
                         <div class="form-group">
                             <label class="control-label small">Center</label>
                             <div class="input-group">
-                                <input class="form-control input-sm" type="number" step="any" ng-model="center.lng">
+                                <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lng">
                                 <div class="input-group-addon">longitude</div>
                             </div>
                             <div class="input-group">
-                                <input class="form-control input-sm" type="number" step="any" ng-model="center.lat">
+                                <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lat">
                                 <div class="input-group-addon">latitude</div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label small">Zoom</label>
-                            <input class="form-control input-sm" type="number" ng-model="center.zoom">
+                            <input class="form-control input-sm" type="number" ng-model="map.center.zoom">
                         </div>
                         <div class="form-group">
                             <label class="control-label small">Map Attribution</label>
                             <input class="form-control input-sm" type="text"
-                                ng-model="tiles.options.attribution"
+                                ng-model="map.tiles.default.options.attribution"
                                 ng-model-options="{ updateOn: 'blur' }"
                                 ng-keyup="cancel($event)">
                         </div>
@@ -67,7 +66,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-12 text-right">
-                        <button type="submit" class="btn btn-md btn-info" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
+                        <button ng-click="print()" class="btn btn-md btn-info" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
                     </div>
                 </div>
 

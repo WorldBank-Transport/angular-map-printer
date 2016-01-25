@@ -28,13 +28,24 @@ angular.module('mapPrinterApp')
             {'name': 'A5 Landscape', 'class': 'a5-landscape'}
         ]
 
-        $scope.paper = $scope.papers[8].class
-        $scope.paperName = $scope.papers[8].name
+        urlParams = $location.search()
+        $scope.centerUrlHash = ''
+
+        defaults =
+            paper: 8
+
+        if urlParams.p? and $filter('filter')($scope.papers, {class: urlParams.p})[0]?
+            $scope.paper = urlParams.p
+        else
+            $scope.paper = $scope.papers[defaults.paper].class
+
         $scope.snapshotURL = null
 
-        angular.extend $scope,
-            tiles: Map.tiles.default
-            center: Map.center
+        if urlParams.u?
+            $scope.map.tiles.default.url = urlParams.u
+
+        if urlParams.a?
+            $scope.map.tiles.default.options.attribution = urlParams.a
 
         leafletData.getMap('map').then((_map) ->
             map = _map
@@ -55,11 +66,10 @@ angular.module('mapPrinterApp')
             ctx.font = "14px Arial"
             ctx.textAlign = "end"
             ctx.textBaseline="bottom"
-            ctx.fillText($scope.tiles.options.attribution, canvas.width-10, canvas.height - 10)
+            ctx.fillText($scope.map.tiles.default.options.attribution, canvas.width-10, canvas.height - 10)
             img.src = canvas.toDataURL()
             $scope.snapshotURL = img.src
             $scope.canvasIsLoading = false
-            $scope.$apply()
             document.getElementById('snapshot').innerHTML = ''
             document.getElementById('snapshot').appendChild img
             # force #snapshot .modal-backdrop to reach beyond window height if necessary
@@ -68,15 +78,24 @@ angular.module('mapPrinterApp')
             , 1000
 
         $scope.$on 'centerUrlHash', (event, centerHash) ->
-            $location.search c: centerHash
+            $scope.centerUrlHash = centerHash
+            refreshUrlParams()
             return
 
         $scope.$watch 'paper', ((newVal, oldVal) ->
-            $scope.paperName = $filter('filter')($scope.papers, {class: newVal})[0].name
+            try
+                $scope.paperName = $filter('filter')($scope.papers, {class: newVal})[0].name
+            catch e
+                $scope.paper = $scope.papers[defaults.paper].class
+            refreshUrlParams()
             $timeout ->
                 if map?
                     map.invalidateSize()
             , 1000
+        )
+
+        $scope.$watchGroup ['map.tiles.default.url', 'map.tiles.default.options.attribution'], ((newVal, oldVal) ->
+            refreshUrlParams()
         )
 
         $scope.printSnapshot = () ->
@@ -94,4 +113,12 @@ angular.module('mapPrinterApp')
             printWindow.document.write(imagepage)
             printWindow.document.close()
             printWindow.focus()
+
+        refreshUrlParams = () ->
+            urlParams = $location.search()
+            urlParams.c = $scope.centerUrlHash
+            urlParams.p = $scope.paper
+            urlParams.u = $scope.map.tiles.default.url
+            urlParams.a = $scope.map.tiles.default.options.attribution
+            $location.search urlParams
     ]
