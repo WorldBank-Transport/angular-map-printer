@@ -20,4 +20,10 @@ angular.module('mapPrinterApp')
             lat: -6.81643
             lng: 39.2856
             zoom: 13
+        attribution:
+            size: 14
+            font: 'Aria'
+            style: 'normal'
+            color: 'rgba(0,0,0,1.0)'
+            position: 'bottomright'
     }

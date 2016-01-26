@@ -18,7 +18,9 @@ angular
     'ngRoute',
     'ngSanitize',
     'ngTouch',
-    'leaflet-directive'
+    'leaflet-directive',
+    'jdFontselect',
+    'colorpicker.module'
   ])
   .config ($routeProvider, $compileProvider) ->
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|blob):|data:image\//)

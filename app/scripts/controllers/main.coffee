@@ -28,24 +28,25 @@ angular.module('mapPrinterApp')
             {'name': 'A5 Landscape', 'class': 'a5-landscape'}
         ]
 
+        $scope.textStyles = [
+            'normal'
+            'bold'
+            'italic'
+            'italic bold'
+        ]
+
+        $scope.positions = [
+            'topleft'
+            'topright'
+            'bottomleft'
+            'bottomright'
+        ]
+
         urlParams = $location.search()
         $scope.centerUrlHash = ''
-
+        $scope.snapshotURL = null
         defaults =
             paper: 8
-
-        if urlParams.p? and $filter('filter')($scope.papers, {class: urlParams.p})[0]?
-            $scope.paper = urlParams.p
-        else
-            $scope.paper = $scope.papers[defaults.paper].class
-
-        $scope.snapshotURL = null
-
-        if urlParams.u?
-            $scope.map.tiles.default.url = urlParams.u
-
-        if urlParams.a?
-            $scope.map.tiles.default.options.attribution = urlParams.a
 
         leafletData.getMap('map').then((_map) ->
             map = _map
@@ -63,10 +64,35 @@ angular.module('mapPrinterApp')
             img.width = dimensions.x
             img.height = dimensions.y
             ctx = canvas.getContext("2d")
-            ctx.font = "14px Arial"
-            ctx.textAlign = "end"
-            ctx.textBaseline="bottom"
-            ctx.fillText($scope.map.tiles.default.options.attribution, canvas.width-10, canvas.height - 10)
+            ctx.font = "#{ $scope.map.attribution.style } #{ $scope.map.attribution.size }px #{ $scope.map.attribution.font }"
+            ctx.fillStyle = $scope.map.attribution.color
+            corners =
+                'topleft':
+                    x: 10
+                    y: 10
+                'topright':
+                    x: canvas.width-10
+                    y: 10
+                'bottomleft':
+                    x: 10
+                    y: canvas.height - 10
+                'bottomright':
+                    x: canvas.width - 10
+                    y: canvas.height - 10
+            textAlignPosition =
+                'topleft': 'start'
+                'topright': 'end'
+                'bottomleft': 'start'
+                'bottomright': 'end'
+            textBaselinePosition =
+                'topleft': 'top'
+                'topright': 'top'
+                'bottomleft': 'bottom'
+                'bottomright': 'bottom'
+            ctx.textAlign = textAlignPosition[$scope.map.attribution.position]
+            ctx.textBaseline=textBaselinePosition[$scope.map.attribution.position]
+            coords = corners[$scope.map.attribution.position]
+            ctx.fillText($scope.map.tiles.default.options.attribution, coords.x, coords.y)
             img.src = canvas.toDataURL()
             $scope.snapshotURL = img.src
             $scope.canvasIsLoading = false
@@ -94,8 +120,16 @@ angular.module('mapPrinterApp')
             , 1000
         )
 
-        $scope.$watchGroup ['map.tiles.default.url', 'map.tiles.default.options.attribution'], ((newVal, oldVal) ->
-            refreshUrlParams()
+        $scope.$watchGroup [
+                'map.tiles.default.url'
+                'map.tiles.default.options.attribution'
+                'map.attribution.size'
+                'map.attribution.font'
+                'map.attribution.style'
+                'map.attribution.color'
+                'map.attribution.position'
+            ],((newVal, oldVal) ->
+                refreshUrlParams()
         )
 
         $scope.printSnapshot = () ->
@@ -114,11 +148,38 @@ angular.module('mapPrinterApp')
             printWindow.document.close()
             printWindow.focus()
 
+        readUrlParams = () ->
+            urlParams = $location.search()
+            if urlParams.p? and $filter('filter')($scope.papers, {class: urlParams.p})[0]?
+                $scope.paper = urlParams.p
+            else
+                $scope.paper = $scope.papers[defaults.paper].class
+            if urlParams.u?
+                $scope.map.tiles.default.url = urlParams.u
+            if urlParams.a?
+                $scope.map.tiles.default.options.attribution = urlParams.a
+            if parseInt(urlParams.as)
+                $scope.map.attribution.size = parseInt(urlParams.as)
+            if urlParams.af?
+                $scope.map.attribution.font = urlParams.af
+            if urlParams.at? and urlParams.at in $scope.textStyles
+                $scope.map.attribution.style = urlParams.at
+            if urlParams.ac?
+                $scope.map.attribution.color = urlParams.ac
+            if urlParams.ap? and urlParams.ap in $scope.positions
+                $scope.map.attribution.position = urlParams.ap
+        readUrlParams()
+
         refreshUrlParams = () ->
             urlParams = $location.search()
             urlParams.c = $scope.centerUrlHash
             urlParams.p = $scope.paper
             urlParams.u = $scope.map.tiles.default.url
             urlParams.a = $scope.map.tiles.default.options.attribution
+            urlParams.as = $scope.map.attribution.size
+            urlParams.af = $scope.map.attribution.font
+            urlParams.at = $scope.map.attribution.style
+            urlParams.ac = $scope.map.attribution.color
+            urlParams.ap = $scope.map.attribution.position
             $location.search urlParams
     ]

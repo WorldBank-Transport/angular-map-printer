@@ -57,10 +57,37 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label small">Map Attribution</label>
-                            <input class="form-control input-sm" type="text"
-                                ng-model="map.tiles.default.options.attribution"
-                                ng-model-options="{ updateOn: 'blur' }"
-                                ng-keyup="cancel($event)">
+                            <div class="input-group">
+                                <div class="input-group-addon">text</div>
+                                <input class="form-control input-sm" type="text"
+                                    ng-model="map.tiles.default.options.attribution"
+                                    ng-model-options="{ updateOn: 'blur' }"
+                                    ng-keyup="cancel($event)">
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-addon">size (px)</div>
+                                <input class="form-control input-sm" type="number" step="1" ng-model="map.attribution.size">
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-addon">font</div>
+                                <jd-fontselect stack="map.attribution.font" ng-dbclick="toggle($event)"/>
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-addon">style</div>
+                                <select class="form-control input-sm"
+                                    ng-options="style for style in textStyles" ng-model="map.attribution.style">
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-addon">color</div>
+                                <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.attribution.color">
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-addon">position</div>
+                                <select class="form-control input-sm"
+                                    ng-options="position for position in positions" ng-model="map.attribution.position">
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>

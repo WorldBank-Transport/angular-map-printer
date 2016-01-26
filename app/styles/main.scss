@@ -140,6 +140,7 @@ body, html {
     right: 5px;
     min-width: 20%;
     max-width: 320px;
+    overflow-y: scroll;
 }
 
 #print-preview img{
@@ -148,6 +149,49 @@ body, html {
 }
 #print-preview .modal-body{
     background: #222222;
+}
+
+.jdfs-main{
+    width: 100%;
+    height: 30px;
+}
+.jdfs-search-indicator {
+    display: none
+}
+.jdfs-main label{
+    font-weight: normal;
+}
+.jdfs-toggle-search{
+    width: 70%;
+    color: #222222;
+    border: none;
+    text-align:left
+}
+.jdfs-search{
+    width: 70%;
+    border: none
+}
+.jdfs-search:focus{
+    border: none;
+    outline: none;
+}
+.jdfs-highlight, .jdfs-highlight:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #EEE;
+}
+button.jdfs-toggle{
+    border: none;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none
+}
+.jdfs-window{
+    width: 100%;
+    z-index: 6;
+    height: 200px;
+    overflow-y: auto;
+}
+.jdfs-fontlist{
+    height: none;
 }
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
