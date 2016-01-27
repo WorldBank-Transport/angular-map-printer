@@ -45,6 +45,8 @@ angular.module('mapPrinterApp')
         urlParams = $location.search()
         $scope.centerUrlHash = ''
         $scope.snapshotURL = null
+        ctx = null
+        canvas = null
         defaults =
             paper: 8
 
@@ -65,35 +67,7 @@ angular.module('mapPrinterApp')
             img.width = dimensions.x
             img.height = dimensions.y
             ctx = canvas.getContext("2d")
-            ctx.font = "#{ $scope.map.attribution.style } #{ $scope.map.attribution.size }px #{ $scope.map.attribution.font }"
-            ctx.fillStyle = $scope.map.attribution.color
-            corners =
-                'topleft':
-                    x: 10
-                    y: 10
-                'topright':
-                    x: canvas.width-10
-                    y: 10
-                'bottomleft':
-                    x: 10
-                    y: canvas.height - 10
-                'bottomright':
-                    x: canvas.width - 10
-                    y: canvas.height - 10
-            textAlignPosition =
-                'topleft': 'start'
-                'topright': 'end'
-                'bottomleft': 'start'
-                'bottomright': 'end'
-            textBaselinePosition =
-                'topleft': 'top'
-                'topright': 'top'
-                'bottomleft': 'bottom'
-                'bottomright': 'bottom'
-            ctx.textAlign = textAlignPosition[$scope.map.attribution.position]
-            ctx.textBaseline=textBaselinePosition[$scope.map.attribution.position]
-            coords = corners[$scope.map.attribution.position]
-            ctx.fillText($scope.map.tiles.default.options.attribution, coords.x, coords.y)
+            writeOnCanvas($scope.map.tiles.default.options.attribution, $scope.map.attribution)
             img.src = canvas.toDataURL()
             $scope.snapshotURL = img.src
             $scope.canvasIsLoading = false
@@ -211,4 +185,38 @@ angular.module('mapPrinterApp')
                     font-style: italic;
                 }
                 "
+        writeOnCanvas = (text, options) ->
+            try
+                ctx = canvas.getContext("2d")
+                ctx.font = "#{ options.style } #{ options.size }px #{ options.font }"
+                ctx.fillStyle = options.color
+                corners =
+                    'topleft':
+                        x: 10
+                        y: 10
+                    'topright':
+                        x: canvas.width-10
+                        y: 10
+                    'bottomleft':
+                        x: 10
+                        y: canvas.height - 10
+                    'bottomright':
+                        x: canvas.width - 10
+                        y: canvas.height - 10
+                textAlignPosition =
+                    'topleft': 'start'
+                    'topright': 'end'
+                    'bottomleft': 'start'
+                    'bottomright': 'end'
+                textBaselinePosition =
+                    'topleft': 'top'
+                    'topright': 'top'
+                    'bottomleft': 'bottom'
+                    'bottomright': 'bottom'
+                ctx.textAlign = textAlignPosition[options.position]
+                ctx.textBaseline=textBaselinePosition[options.position]
+                coords = corners[options.position]
+                ctx.fillText(text, coords.x, coords.y)
+            catch e
+                console.log e
     ]
