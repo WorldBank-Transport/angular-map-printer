@@ -27,5 +27,6 @@ angular.module('mapPrinterApp')
             color: 'rgba(0,0,0,1.0)'
             position: 'bottomright'
         controls: {}
-        defaults: {}
+        defaults:
+            zoomControl: false
     }
