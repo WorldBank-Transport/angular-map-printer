@@ -8,7 +8,7 @@
  # Controller of the mapPrinterApp
 ###
 angular.module('mapPrinterApp')
-    .controller 'MainCtrl', ['$scope', '$location', '$timeout', '$filter', 'leafletData', 'Map', ($scope, $location, $timeout, $filter, leafletData, Map) ->
+    .controller 'MainCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$filter', 'leafletData', 'Map', ($scope, $rootScope, $location, $timeout, $filter, leafletData, Map) ->
         $scope.map = Map
         map = null # Leaflet Map instance
         $scope.canvasIsLoading = false
@@ -50,6 +50,7 @@ angular.module('mapPrinterApp')
 
         leafletData.getMap('map').then((_map) ->
             map = _map
+            refreshMapStyle()
         )
 
         $scope.print = () ->
@@ -130,6 +131,7 @@ angular.module('mapPrinterApp')
                 'map.attribution.position'
             ],((newVal, oldVal) ->
                 refreshUrlParams()
+                refreshMapStyle()
         )
 
         $scope.printSnapshot = () ->
@@ -182,4 +184,31 @@ angular.module('mapPrinterApp')
             urlParams.ac = $scope.map.attribution.color
             urlParams.ap = $scope.map.attribution.position
             $location.search urlParams
+
+        refreshMapStyle = () ->
+            if map?
+                map.attributionControl.setPrefix('');
+                map.attributionControl.setPosition($scope.map.attribution.position);
+            $rootScope.mapCss = "
+            .leaflet-container .leaflet-control-attribution{
+                background-color: none;
+                background: none;
+                font-size: #{ $scope.map.attribution.size }px;
+                font-style: #{ $scope.map.attribution.style };
+                font-family: #{ $scope.map.attribution.font };
+                color: #{ $scope.map.attribution.color };
+            }
+            "
+            if $scope.map.attribution.style.indexOf('bold') > -1
+                $rootScope.mapCss += "
+                .leaflet-container .leaflet-control-attribution{
+                    font-weight: bold;
+                }
+                "
+            if $scope.map.attribution.style.indexOf('italic') > -1
+                $rootScope.mapCss += "
+                .leaflet-container .leaflet-control-attribution{
+                    font-style: italic;
+                }
+                "
     ]
