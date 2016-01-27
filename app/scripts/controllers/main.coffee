@@ -59,9 +59,10 @@ angular.module('mapPrinterApp')
           $scope.canvasIsLoading = true
           $scope.snapshotURL = null
           document.getElementById('snapshot').innerHTML = ''
-          leafletImage map, (err, canvas) ->
+          leafletImage map, (err, cnvs) ->
             # now you have canvas
             # example thing to do with that canvas:
+            canvas = cnvs
             img = document.createElement('img')
             dimensions = map.getSize()
             img.width = dimensions.x
@@ -187,7 +188,6 @@ angular.module('mapPrinterApp')
                 "
         writeOnCanvas = (text, options) ->
             try
-                ctx = canvas.getContext("2d")
                 ctx.font = "#{ options.style } #{ options.size }px #{ options.font }"
                 ctx.fillStyle = options.color
                 corners =
