@@ -59,15 +59,16 @@ angular.module('mapPrinterApp')
           $scope.canvasIsLoading = true
           $scope.snapshotURL = null
           document.getElementById('snapshot').innerHTML = ''
-          leafletImage map, (err, cnvs) ->
+          leafletImage map, (err, _canvas) ->
             # now you have canvas
             # example thing to do with that canvas:
-            canvas = cnvs
+            canvas = _canvas
             img = document.createElement('img')
             dimensions = map.getSize()
             img.width = dimensions.x
             img.height = dimensions.y
             ctx = canvas.getContext("2d")
+            writeOnCanvas($scope.map.title.text, $scope.map.title)
             writeOnCanvas($scope.map.tiles.default.options.attribution, $scope.map.attribution)
             img.src = canvas.toDataURL()
             $scope.snapshotURL = img.src
@@ -104,6 +105,12 @@ angular.module('mapPrinterApp')
                 'map.attribution.style'
                 'map.attribution.color'
                 'map.attribution.position'
+                'map.title.text'
+                'map.title.size'
+                'map.title.font'
+                'map.title.style'
+                'map.title.color'
+                'map.title.position'
             ],((newVal, oldVal) ->
                 refreshUrlParams()
                 refreshMapStyle()
@@ -133,6 +140,20 @@ angular.module('mapPrinterApp')
                 $scope.paper = $scope.papers[defaults.paper].class
             if urlParams.u?
                 $scope.map.tiles.default.url = urlParams.u
+            # title
+            if urlParams.t?
+                $scope.map.title.text = urlParams.t
+            if parseInt(urlParams.ts)
+                $scope.map.title.size = parseInt(urlParams.ts)
+            if urlParams.tf?
+                $scope.map.title.font = urlParams.tf
+            if urlParams.tt? and urlParams.tt in $scope.textStyles
+                $scope.map.title.style = urlParams.tt
+            if urlParams.tc?
+                $scope.map.title.color = urlParams.tc
+            if urlParams.tp? and urlParams.tp in $scope.positions
+                $scope.map.title.position = urlParams.tp
+            # attribution
             if urlParams.a?
                 $scope.map.tiles.default.options.attribution = urlParams.a
             if parseInt(urlParams.as)
@@ -152,6 +173,14 @@ angular.module('mapPrinterApp')
             urlParams.c = $scope.centerUrlHash
             urlParams.p = $scope.paper
             urlParams.u = $scope.map.tiles.default.url
+            # title
+            urlParams.t = $scope.map.title.text
+            urlParams.ts = $scope.map.title.size
+            urlParams.tf = $scope.map.title.font
+            urlParams.tt = $scope.map.title.style
+            urlParams.tc = $scope.map.title.color
+            urlParams.tp = $scope.map.title.position
+            # attribution
             urlParams.a = $scope.map.tiles.default.options.attribution
             urlParams.as = $scope.map.attribution.size
             urlParams.af = $scope.map.attribution.font
@@ -162,8 +191,10 @@ angular.module('mapPrinterApp')
 
         refreshMapStyle = () ->
             if map?
-                map.attributionControl.setPrefix('');
-                map.attributionControl.setPosition($scope.map.attribution.position);
+                map.titleControl.addTitle($scope.map.title.text)
+                map.titleControl.setPosition($scope.map.title.position)
+                map.attributionControl.setPrefix('')
+                map.attributionControl.setPosition($scope.map.attribution.position)
             $rootScope.mapCss = "
             .leaflet-container .leaflet-control-attribution{
                 background-color: none;
@@ -173,7 +204,27 @@ angular.module('mapPrinterApp')
                 font-family: #{ $scope.map.attribution.font };
                 color: #{ $scope.map.attribution.color };
             }
+            .leaflet-container .leaflet-control-title{
+                background-color: none;
+                background: none;
+                font-size: #{ $scope.map.title.size }px;
+                font-style: #{ $scope.map.title.style };
+                font-family: #{ $scope.map.title.font };
+                color: #{ $scope.map.title.color };
+            }
             "
+            if $scope.map.title.style.indexOf('bold') > -1
+                $rootScope.mapCss += "
+                .leaflet-container .leaflet-control-title{
+                    font-weight: bold;
+                }
+                "
+            if $scope.map.title.style.indexOf('italic') > -1
+                $rootScope.mapCss += "
+                .leaflet-container .leaflet-control-title{
+                    font-style: italic;
+                }
+                "
             if $scope.map.attribution.style.indexOf('bold') > -1
                 $rootScope.mapCss += "
                 .leaflet-container .leaflet-control-attribution{
@@ -186,6 +237,7 @@ angular.module('mapPrinterApp')
                     font-style: italic;
                 }
                 "
+
         writeOnCanvas = (text, options) ->
             try
                 ctx.font = "#{ options.style } #{ options.size }px #{ options.font }"

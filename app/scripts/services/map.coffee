@@ -10,7 +10,7 @@
 angular.module('mapPrinterApp')
   .factory 'Map', ->
 
-    {
+    defaults =
         tiles:
             default:
                 url: 'http://{s}.tiles.mapbox.com/v3/markiliffe.551ae569/{z}/{x}/{y}.png'
@@ -20,6 +20,13 @@ angular.module('mapPrinterApp')
             lat: -6.81643
             lng: 39.2856
             zoom: 13
+        title:
+            text: ''
+            size: 20
+            font: 'Aria'
+            style: 'bold'
+            color: 'rgba(0,0,0,1.0)'
+            position: 'topleft'
         attribution:
             size: 14
             font: 'Aria'
@@ -29,4 +36,6 @@ angular.module('mapPrinterApp')
         controls: {}
         defaults:
             zoomControl: false
-    }
+
+    angular.extend(this, defaults)
+    return this
