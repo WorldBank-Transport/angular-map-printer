@@ -1,5 +1,6 @@
 /*
  * L.Control.Title is used for displaying title on the map (added by default).
+ * Based on L.Control.Attribution
  */
 
 L.Control.Title = L.Control.extend({
