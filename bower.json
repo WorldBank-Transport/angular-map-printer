@@ -23,5 +23,13 @@
     "angular-mocks": "1.4.x",
     "angular-scenario": "1.4.x"
   },
-  "appPath": "app"
+  "overrides":{
+      "bootswatch-dist":{
+         "main":[
+            "js/bootstrap.js",
+            "css/bootstrap.css"
+         ]
+      }
+   },
+   "appPath": "app"
 }
