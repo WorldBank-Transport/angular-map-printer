@@ -29,6 +29,12 @@
             "js/bootstrap.js",
             "css/bootstrap.css"
          ]
+      },
+      "font-awesome": {
+          "main": [
+              "css/font-awesome.css",
+              "fonts/*"
+          ]
       }
    },
    "appPath": "app"
