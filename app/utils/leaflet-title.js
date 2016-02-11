@@ -26,13 +26,12 @@ L.Control.Title = L.Control.extend({
 
 
 	addTitle: function (text) {
-		if (!text) { return this; }
+		if (!text) { this._title = text }
         this._title = text
 		return this;
 	},
 
-	removeTitle: function (text) {
-		if (!text) { return this; }
+	removeTitle: function () {
         this._title = ''
 		return this;
 	},
