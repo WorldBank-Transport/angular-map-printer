@@ -12,6 +12,7 @@ angular.module('mapPrinterApp')
         $scope.map = Map
         map = null # Leaflet Map instance
         $scope.canvasIsLoading = false
+        legendCanvas = null
 
         $scope.papers =[
             {'name': 'A0', 'class': 'a0'}
@@ -45,6 +46,9 @@ angular.module('mapPrinterApp')
         urlParams = $location.search()
         $scope.centerUrlHash = ''
         $scope.snapshotURL = null
+        defaultLegendEntry = color: '#000000', label: ''
+        $scope.legendEntry = angular.copy(defaultLegendEntry)
+
         ctx = null
         canvas = null
         defaults =
@@ -68,8 +72,12 @@ angular.module('mapPrinterApp')
             img.width = dimensions.x
             img.height = dimensions.y
             ctx = canvas.getContext("2d")
+
+            # draw map components on canvas
             writeOnCanvas($scope.map.title.text, $scope.map.title)
             writeOnCanvas($scope.map.tiles.default.options.attribution, $scope.map.attribution)
+            drawOnCanvas(legendCanvas, $scope.map.legend)
+
             img.src = canvas.toDataURL()
             $scope.snapshotURL = img.src
             $scope.canvasIsLoading = false
@@ -111,10 +119,23 @@ angular.module('mapPrinterApp')
                 'map.title.style'
                 'map.title.color'
                 'map.title.position'
+                'map.legend.size'
+                'map.legend.font'
+                'map.legend.style'
+                'map.legend.color'
+                'map.legend.background'
+                'map.legend.position'
             ],((newVal, oldVal) ->
+                buildLegend()
                 refreshUrlParams()
                 refreshMapStyle()
         )
+
+        $scope.$watch 'map.legend.items', ((newVal, oldVal) ->
+            buildLegend()
+            refreshUrlParams()
+            refreshMapStyle()
+        ), true
 
         $scope.printSnapshot = () ->
             imagepage = "
@@ -166,6 +187,21 @@ angular.module('mapPrinterApp')
                 $scope.map.attribution.color = urlParams.ac
             if urlParams.ap? and urlParams.ap in $scope.positions
                 $scope.map.attribution.position = urlParams.ap
+            # legend
+            if parseInt(urlParams.ls)
+                $scope.map.legend.size = parseInt(urlParams.ls)
+            if urlParams.lf?
+                $scope.map.legend.font = urlParams.lf
+            if urlParams.lt? and urlParams.lt in $scope.textStyles
+                $scope.map.legend.style = urlParams.lt
+            if urlParams.lc?
+                $scope.map.legend.color = urlParams.lc
+            if urlParams.lb?
+                $scope.map.legend.background = urlParams.lb
+            if urlParams.lp? and urlParams.lp in $scope.positions
+                $scope.map.legend.position = urlParams.lp
+            if urlParams.li?
+                $scope.map.legend.items = JSON.parse(decodeURIComponent(urlParams.li))
         readUrlParams()
 
         refreshUrlParams = () ->
@@ -187,12 +223,23 @@ angular.module('mapPrinterApp')
             urlParams.at = $scope.map.attribution.style
             urlParams.ac = $scope.map.attribution.color
             urlParams.ap = $scope.map.attribution.position
+            # legend
+            urlParams.ls = $scope.map.legend.size
+            urlParams.lf = $scope.map.legend.font
+            urlParams.lt = $scope.map.legend.style
+            urlParams.lc = $scope.map.legend.color
+            urlParams.lb = $scope.map.legend.background
+            urlParams.lp = $scope.map.legend.position
+            urlParams.li = encodeURIComponent(JSON.stringify($scope.map.legend.items))
             $location.search urlParams
 
         refreshMapStyle = () ->
             if map?
                 map.titleControl.addTitle($scope.map.title.text)
                 map.titleControl.setPosition($scope.map.title.position)
+                map.legendControl.addLegend($scope.map.legend.text)
+                map.legendControl.setPosition($scope.map.legend.position)
+                buildLegend()
                 map.attributionControl.setPrefix('')
                 map.attributionControl.setPosition($scope.map.attribution.position)
             $rootScope.mapCss = "
@@ -271,4 +318,80 @@ angular.module('mapPrinterApp')
                 ctx.fillText(text, coords.x, coords.y)
             catch e
                 console.log e
+
+        drawOnCanvas = (el, options) ->
+            try
+                corners =
+                    'topleft':
+                        x: 10
+                        y: 10
+                    'topright':
+                        x: canvas.width - el.width
+                        y: 10
+                    'bottomleft':
+                        x: 10
+                        y: canvas.height - el.height
+                    'bottomright':
+                        x: canvas.width - el.width
+                        y: canvas.height - el.height
+                coords = corners[options.position]
+                ctx.drawImage(el, coords.x, coords.y)
+            catch e
+                console.log e
+
+        $scope.addLegendEntry = () ->
+            $scope.map.legend.items.push(angular.copy($scope.legendEntry))
+            $scope.legendEntry = angular.copy(defaultLegendEntry)
+
+        $scope.removeLegendEntry = (i) ->
+            $scope.map.legend.items.splice(i, 1);
+
+        buildLegend = () ->
+            # generate content
+            _legend = ''
+            extraStyle = {}
+            if $scope.map.legend.style.indexOf('bold') > -1
+                extraStyle['font-weight'] = 'bold'
+            if $scope.map.legend.style.indexOf('italic') > -1
+                extraStyle['font-style'] = 'italic'
+            for item in $scope.map.legend.items
+                _legend += "
+                <div style='padding: 5px 10px'>
+                    <i
+                        style='
+                            background-color:#{ item.color };
+                            width: 25px;
+                            height: 18px;
+                            display: inline-block;
+                            vertical-align: middle
+                        '>
+                    </i>
+                    <span
+                            style='padding: 4px;
+                            font-style: #{ extraStyle['font-style'] };
+                            font-weight: #{ extraStyle['font-weight'] };'>
+                        #{ item.label }
+                    </span><br>
+                </div>
+                "
+            $scope.map.legend.text = "
+            <div
+                style='
+                background-color: none;
+                background: #{ $scope.map.legend.background };
+                font-size: #{ $scope.map.legend.size }px;
+                font-style: #{ $scope.map.legend.style };
+                font-family: #{ $scope.map.legend.font };
+                color: #{ $scope.map.legend.color };
+                border-radius: 3px;'
+                class='leaflet-control-legend-container'>
+                #{ _legend }
+            </div>
+            "
+            if map?
+                legendCanvas = document.getElementById('_legend-canvas')
+                legendCanvas.width = map.legendControl.getContainer().offsetWidth + 20
+                legendCanvas.height = map.legendControl.getContainer().offsetHeight + 20
+                legendCtx = legendCanvas.getContext("2d")
+                rasterizeHTML.drawHTML($scope.map.legend.text, legendCanvas)
     ]

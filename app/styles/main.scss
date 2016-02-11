@@ -1,6 +1,5 @@
 $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/bootstrap/";
 // bower:scss
-@import "font-awesome/scss/font-awesome.scss";
 // endbower
 
 .browsehappy {
@@ -194,6 +193,12 @@ button.jdfs-toggle{
 }
 .jdfs-fontlist{
     height: none;
+}
+
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control{
+    background-color: #DDD
 }
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {

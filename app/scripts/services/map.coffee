@@ -33,6 +33,14 @@ angular.module('mapPrinterApp')
             style: 'normal'
             color: 'rgba(0,0,0,1.0)'
             position: 'bottomright'
+        legend:
+            size: 12
+            font: 'Aria'
+            style: 'normal'
+            color: 'rgba(0,0,0,1.0)'
+            background: 'rgba(255,255,255,0.8)'
+            position: 'bottomleft'
+            items: []
         controls: {}
         defaults:
             zoomControl: false

@@ -10,6 +10,7 @@
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="bower_components/bootswatch-dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="bower_components/angular-fontselect/dist/angular-fontselect.css" />
     <link rel="stylesheet" href="bower_components/angular-bootstrap-colorpicker/css/colorpicker.css" />
     <!-- endbower -->
@@ -18,7 +19,6 @@
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <style ng-bind="mapCss"></style>
   </head>
   <body>
@@ -71,6 +71,8 @@
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="utils/leaflet-title.js"></script>
         <script src="utils/leaflet-image.js"></script>
+        <script src="utils/leaflet-legend.js"></script>
+        <script src="utils/rasterizeHTML.allinone.js"></script>
         <script src="scripts/app.js"></script>
         <script src="scripts/controllers/main.js"></script>
         <script src="scripts/controllers/about.js"></script>
