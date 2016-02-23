@@ -190,6 +190,11 @@ button.jdfs-toggle{
     z-index: 6;
     height: 200px;
     overflow-y: auto;
+    background-color: #1c1e22;
+    border: 1px solid #0c0d0e;
+}
+.jdfs-window button{
+    color: #444;
 }
 .jdfs-fontlist{
     height: none;
