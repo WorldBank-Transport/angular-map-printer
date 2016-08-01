@@ -11,6 +11,7 @@ angular.module('mapPrinterApp')
     .controller 'MainCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$filter', 'leafletData', 'Map', ($scope, $rootScope, $location, $timeout, $filter, leafletData, Map) ->
         $scope.map = Map
         map = null # Leaflet Map instance
+        cartodbLayer = null
         $scope.canvasIsLoading = false
         legendCanvas = null
 
@@ -108,6 +109,7 @@ angular.module('mapPrinterApp')
         $scope.$watchGroup [
                 'map.tiles.default.url'
                 'map.tiles.default.options.attribution'
+                'map.cartodb.vis'
                 'map.attribution.size'
                 'map.attribution.font'
                 'map.attribution.style'
@@ -161,6 +163,9 @@ angular.module('mapPrinterApp')
                 $scope.paper = $scope.papers[defaults.paper].class
             if urlParams.u?
                 $scope.map.tiles.default.url = urlParams.u
+            # cartodb
+            if urlParams.cu?
+                $scope.map.cartodb.vis = urlParams.cu
             # title
             if urlParams.t?
                 $scope.map.title.text = urlParams.t
@@ -209,6 +214,8 @@ angular.module('mapPrinterApp')
             urlParams.c = $scope.centerUrlHash
             urlParams.p = $scope.paper
             urlParams.u = $scope.map.tiles.default.url
+            # cartodb
+            urlParams.cu = $scope.map.cartodb.vis
             # title
             urlParams.t = $scope.map.title.text
             urlParams.ts = $scope.map.title.size
@@ -240,6 +247,14 @@ angular.module('mapPrinterApp')
                 map.legendControl.addLegend($scope.map.legend.text)
                 map.legendControl.setPosition($scope.map.legend.position)
                 buildLegend()
+                if cartodbLayer?
+                    map.removeLayer(cartodbLayer)
+                if $scope.map.cartodb.vis? and $scope.map.cartodb.vis != ''
+                    cartodb.createLayer(map, $scope.map.cartodb.vis, $scope.map.cartodb.options).addTo(map)
+                      .on 'done', (layer) ->
+                        cartodbLayer = layer
+                      .on 'error', ->
+                        console.log 'error adding cartodb layer'
                 map.attributionControl.setPrefix('')
                 map.attributionControl.setPosition($scope.map.attribution.position)
             $rootScope.mapCss = "

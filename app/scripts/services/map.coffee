@@ -16,6 +16,17 @@ angular.module('mapPrinterApp')
                 url: 'http://{s}.tiles.mapbox.com/v3/markiliffe.551ae569/{z}/{x}/{y}.png'
                 options:
                     attribution: '© TODI, © OpenStreetMap contributors'
+        cartodb:
+            vis: ''
+            options:
+                shareable: false
+                title: false
+                description: false
+                search: false
+                carto_logo: false
+                time_slider: true
+                layer_selector: true
+                legends: false
         center:
             lat: -6.81643
             lng: 39.2856
