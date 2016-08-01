@@ -17,7 +17,8 @@
     "bootswatch-dist": "3.3.6-slate",
     "font-awesome": "latest",
     "angular-fontselect": "^0.12.4",
-    "angular-bootstrap-colorpicker": "^3.0.23"
+    "angular-bootstrap-colorpicker": "^3.0.23",
+    "cartodb.js": "3.15.9"
   },
   "devDependencies": {
     "angular-mocks": "1.4.x",
@@ -25,7 +26,7 @@
   },
   "overrides":{
       "bootswatch-dist":{
-         "main":[
+          "main":[
             "js/bootstrap.js",
             "css/bootstrap.css"
          ]
@@ -35,6 +36,11 @@
               "css/font-awesome.css",
               "fonts/*"
           ]
+      },
+      "angular-leaflet-directive":{
+        "dependencies": {
+          "angular": "1.x"
+        }
       }
    },
    "appPath": "app"
