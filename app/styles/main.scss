@@ -15,6 +15,9 @@ body, html {
   padding-bottom: 0;
   height: 100%;
 }
+body{
+    padding-top: 50px;
+}
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
 .header,
@@ -35,6 +38,10 @@ body, html {
     line-height: 40px;
     padding-bottom: 19px;
   }
+}
+
+.navbar-brand {
+    padding: 5px 15px;
 }
 
 /* Custom page footer */
@@ -129,19 +136,21 @@ body, html {
     height: 148mm;
     width: 210mm
 }
+#map-container-wrapper{
+    overflow: auto;
+    pading: 0;
+}
 #map-container{
     display: block;
-    margin: 10px auto;
+    margin: auto;
+    overflow: auto;
 }
 
 #toolbox{
-    position: fixed;
-    top: 0;
     right: 5px;
-    min-width: 20%;
-    max-width: 320px;
-    overflow-y: scroll;
-    z-index: 1000
+    overflow-y: auto;
+    z-index: 1000;
+    max-height: 100%;
 }
 
 #print-preview img{

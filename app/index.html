@@ -2,7 +2,7 @@
 <html class="no-js" ng-app="mapPrinterApp">
   <head>
     <meta charset="utf-8">
-    <title>Printable maps</title>
+    <title>MapPrinter | Convert Web maps to printable images</title>
     <meta name="description" content="Print web based geographical maps easily using your web browser">
     <meta name="viewport" content="width=device-width">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -25,9 +25,19 @@
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
+    <nav class="navbar navbar-default navbar-fixed-top" id="main-nav">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" ng-href="#/home">
+                    <small><strong>MapPrinter</strong></small><br>
+                    <small class="text-info pull-left">Convert Web maps to printable images</small>
+                </a>
+            </div>
+        </div>
+    </nav>
 
     <!-- Application content here -->
-    <div id="container-main" ng-view=""></div>
+    <div id="container-main" class="container-fluid" ng-view=""></div>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>
@@ -79,5 +89,17 @@
         <script src="scripts/services/l.js"></script>
         <script src="scripts/services/map.js"></script>
         <!-- endbuild -->
+
+    <!-- Adjust content height -->
+    <script>
+        $(document).ready(function(){
+            var bodyHeight = $(window).height() - $('#main-nav').height();
+            $('body').height(bodyHeight);
+        });
+        $(window).resize(function(){
+            var bodyHeight = $(window).height() - $('#main-nav').height();
+            $('body').height(bodyHeight);
+        });
+    </script>
 </body>
 </html>

@@ -29,6 +29,8 @@ angular
         templateUrl: 'views/main.html'
         controller: 'MainCtrl'
         reloadOnSearch: false
+      .when '/home',
+        redirectTo: '/'
       .when '/about',
         templateUrl: 'views/about.html'
         controller: 'AboutCtrl'

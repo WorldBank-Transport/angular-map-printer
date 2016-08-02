@@ -1,5 +1,6 @@
+
 <div class="row height-match-parent">
-    <div class="col-sm-12 height-match-parent">
+    <div class="col-sm-9 height-match-parent" id="map-container-wrapper">
         <div id="map-container" ng-class="paper">
             <leaflet
                 id="map"
@@ -11,198 +12,193 @@
             </leaflet>
         </div>
     </div>
-</div>
 
-<div class="height-match-parent hidden-print" id="toolbox">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="panel-title text-info">Get a printable map</div>
-        </div>
-        <div class="panel-body">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Size</label>
-                    <div class="col-sm-9">
-                        <select class="form-control" ng-options="paper.class as paper.name for paper in papers" ng-model="paper">
-                        </select>
-                    </div>
+    <div class="height-match-parent hidden-print" id="toolbox">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="panel-title text-info">
+                    Options
+                    <button ng-click="print()" class="btn btn-sm btn-info pull-right" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
                 </div>
-                <button class="btn btn-primary btn-sm"
-                        type="button" data-toggle="collapse"
-                        data-target="#advanced-options" aria-expanded="false"
-                        aria-controls="advanced-options">
-                    Settings
-                </button>
-                <div class="collapse" id="advanced-options">
-                    <div class="well">
-                        <div class="form-group">
-                            <label class="control-label small">Map URL</label>
-                            <input class="form-control input-sm" type="text"
-                                ng-model="map.tiles.default.url"
-                                ng-model-options="{ updateOn: 'blur' }"
-                                ng-keyup="cancel($event)">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">CartoDB vis URL</label>
-                            <input class="form-control input-sm" type="text"
-                                ng-model="map.cartodb.vis"
-                                ng-model-options="{ updateOn: 'blur' }"
-                                ng-keyup="cancel($event)">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Center</label>
-                            <div class="input-group">
-                                <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lng">
-                                <div class="input-group-addon">longitude</div>
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div id="advanced-options">
+                        <div class="well">
+                            <div class="form-group">
+                                <label class="control-label small">Size</label>
+                                <select class="form-control input-sm" ng-options="paper.class as paper.name for paper in papers" ng-model="paper"></select>
                             </div>
-                            <div class="input-group">
-                                <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lat">
-                                <div class="input-group-addon">latitude</div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Zoom</label>
-                            <input class="form-control input-sm" type="number" ng-model="map.center.zoom">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Map Title</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">text</div>
+                            <div class="form-group">
+                                <label class="control-label small">Base Map URL</label>
                                 <input class="form-control input-sm" type="text"
-                                    ng-model="map.title.text"
+                                    ng-model="map.tiles.default.url"
                                     ng-model-options="{ updateOn: 'blur' }"
                                     ng-keyup="cancel($event)">
                             </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">font</div>
-                                <jd-fontselect stack="map.title.font" ng-dbclick="toggle($event)"/>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">font size (px)</div>
-                                <input class="form-control input-sm" type="number" step="1" ng-model="map.title.size">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">style</div>
-                                <select class="form-control input-sm"
-                                    ng-options="style for style in textStyles" ng-model="map.title.style">
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">color</div>
-                                <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.title.color">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">position</div>
-                                <select class="form-control input-sm"
-                                    ng-options="position for position in positions" ng-model="map.title.position">
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Map Attribution</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">text</div>
+                            <div class="form-group">
+                                <label class="control-label small">CartoDB Vis' URL</label>
                                 <input class="form-control input-sm" type="text"
-                                    ng-model="map.tiles.default.options.attribution"
+                                    ng-model="map.cartodb.vis"
                                     ng-model-options="{ updateOn: 'blur' }"
                                     ng-keyup="cancel($event)">
                             </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">font</div>
-                                <jd-fontselect stack="map.attribution.font" ng-dbclick="toggle($event)"/>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">font size (px)</div>
-                                <input class="form-control input-sm" type="number" step="1" ng-model="map.attribution.size">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">style</div>
-                                <select class="form-control input-sm"
-                                    ng-options="style for style in textStyles" ng-model="map.attribution.style">
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">color</div>
-                                <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.attribution.color">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">position</div>
-                                <select class="form-control input-sm"
-                                    ng-options="position for position in positions" ng-model="map.attribution.position">
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label small">Legend</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">font</div>
-                                <jd-fontselect stack="map.legend.font" ng-dbclick="toggle($event)"/>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">font size (px)</div>
-                                <input class="form-control input-sm" type="number" step="1" ng-model="map.legend.size">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">text style</div>
-                                <select class="form-control input-sm"
-                                    ng-options="style for style in textStyles" ng-model="map.legend.style">
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">text color</div>
-                                <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.legend.color">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">background color</div>
-                                <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.legend.background">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-group-addon">position</div>
-                                <select class="form-control input-sm"
-                                    ng-options="position for position in positions" ng-model="map.legend.position">
-                                </select>
-                            </div>
-                            <label class="control-label small">Legend items</label>
-                            <div class="input-group" ng-repeat="item in map.legend.items">
-                                <div class="input-group-btn">
-                                    <span class="btn btn-sm"
-                                            style="background-color: {{ map.legend.items[$index].color }}"
-                                            ng-model = map.legend.items[$index].color
-                                            colorpicker="rgba" type="button" colorpicker-position="top" ng-model="map.legend.items[$index].color">
-                                        &nbsp;
-                                    </span>
+                            <div class="form-group">
+                                <label class="control-label small">Center</label>
+                                <div class="input-group">
+                                    <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lng">
+                                    <div class="input-group-addon">longitude</div>
                                 </div>
-                                <input class="form-control input-sm" type="text"
-                                    ng-model="map.legend.items[$index].label">
-                                <div class="input-group-btn">
-                                    <span class="btn btn-sm" ng-click="removeLegendEntry($index)"> <i class="fa fa-minus text-danger"></i> </span>
+                                <div class="input-group">
+                                    <input class="form-control input-sm" type="number" step="any" ng-model="map.center.lat">
+                                    <div class="input-group-addon">latitude</div>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-sm"
-                                            style="background-color: {{ legendEntry.color }}"
-                                            colorpicker="rgba" type="button" colorpicker-position="top" ng-model="legendEntry.color">
-                                        &nbsp;
-                                    </button>
+                            <div class="form-group">
+                                <label class="control-label small">Zoom</label>
+                                <input class="form-control input-sm" type="number" ng-model="map.center.zoom">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label small">Map Title</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">text</div>
+                                    <input class="form-control input-sm" type="text"
+                                        ng-model="map.title.text"
+                                        ng-model-options="{ updateOn: 'blur' }"
+                                        ng-keyup="cancel($event)">
                                 </div>
-                                <input class="form-control input-sm" type="text" ng-model="legendEntry.label" placeholder="add new legend entry">
-                                <div class="input-group-btn">
-                                    <span class="btn btn-sm" ng-click="addLegendEntry()"> <i class="fa fa-plus"></i> </span>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font</div>
+                                    <jd-fontselect stack="map.title.font" ng-dbclick="toggle($event)"/>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font size (px)</div>
+                                    <input class="form-control input-sm" type="number" step="1" ng-model="map.title.size">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">style</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="style for style in textStyles" ng-model="map.title.style">
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">color</div>
+                                    <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.title.color">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">position</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="position for position in positions" ng-model="map.title.position">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label small">Map Attribution</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">text</div>
+                                    <input class="form-control input-sm" type="text"
+                                        ng-model="map.tiles.default.options.attribution"
+                                        ng-model-options="{ updateOn: 'blur' }"
+                                        ng-keyup="cancel($event)">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font</div>
+                                    <jd-fontselect stack="map.attribution.font" ng-dbclick="toggle($event)"/>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font size (px)</div>
+                                    <input class="form-control input-sm" type="number" step="1" ng-model="map.attribution.size">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">style</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="style for style in textStyles" ng-model="map.attribution.style">
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">color</div>
+                                    <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.attribution.color">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">position</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="position for position in positions" ng-model="map.attribution.position">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label small">Legend</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font</div>
+                                    <jd-fontselect stack="map.legend.font" ng-dbclick="toggle($event)"/>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">font size (px)</div>
+                                    <input class="form-control input-sm" type="number" step="1" ng-model="map.legend.size">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">text style</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="style for style in textStyles" ng-model="map.legend.style">
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">text color</div>
+                                    <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.legend.color">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">background color</div>
+                                    <input class="form-control input-sm" type="text" colorpicker="rgba" colorpicker-position="top" ng-model="map.legend.background">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-addon">position</div>
+                                    <select class="form-control input-sm"
+                                        ng-options="position for position in positions" ng-model="map.legend.position">
+                                    </select>
+                                </div>
+                                <label class="control-label small">Legend items</label>
+                                <div class="input-group" ng-repeat="item in map.legend.items">
+                                    <div class="input-group-btn">
+                                        <span class="btn btn-sm"
+                                                style="background-color: {{ map.legend.items[$index].color }}"
+                                                ng-model = map.legend.items[$index].color
+                                                colorpicker="rgba" type="button" colorpicker-position="top" ng-model="map.legend.items[$index].color">
+                                            &nbsp;
+                                        </span>
+                                    </div>
+                                    <input class="form-control input-sm" type="text"
+                                        ng-model="map.legend.items[$index].label">
+                                    <div class="input-group-btn">
+                                        <span class="btn btn-sm" ng-click="removeLegendEntry($index)"> <i class="fa fa-minus text-danger"></i> </span>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-sm"
+                                                style="background-color: {{ legendEntry.color }}"
+                                                colorpicker="rgba" type="button" colorpicker-position="top" ng-model="legendEntry.color">
+                                            &nbsp;
+                                        </button>
+                                    </div>
+                                    <input class="form-control input-sm" type="text" ng-model="legendEntry.label" placeholder="add new legend entry">
+                                    <div class="input-group-btn">
+                                        <span class="btn btn-sm" ng-click="addLegendEntry()"> <i class="fa fa-plus"></i> </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-12 text-right">
-                        <button ng-click="print()" class="btn btn-md btn-info" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
+                    <div class="form-group">
+                        <div class="col-sm-12 text-right">
+                            <button ng-click="print()" class="btn btn-md btn-info" data-toggle="modal" data-target="#print-preview">Next <i class="fa fa-arrow-right"></i></button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 
 <!-- Print modal -->
 <div class="modal fade" id="print-preview" tabindex="-1" role="dialog" aria-labelledby="print preview">
