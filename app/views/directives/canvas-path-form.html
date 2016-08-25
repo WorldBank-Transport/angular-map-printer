@@ -1,0 +1,20 @@
+<form class="form-horizontal">
+
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon">stroke color</div>
+            <input class="form-control input-sm btn btn-sm" type="text"
+                colorpicker="rgba" colorpicker-position="top"
+                ng-model="_model.stroke"
+                style="background-color: {{ _model.stroke }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon">stroke width</div>
+            <input class="form-control input-sm" type="number" step="1" ng-model="_model.strokeWidth" min="0">
+        </div>
+    </div>
+
+</form>

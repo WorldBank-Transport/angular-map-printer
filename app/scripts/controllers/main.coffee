@@ -8,12 +8,16 @@
  # Controller of the mapPrinterApp
 ###
 angular.module('mapPrinterApp')
-    .controller 'MainCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$filter', 'leafletData', 'Map', ($scope, $rootScope, $location, $timeout, $filter, leafletData, Map) ->
+    .controller 'MainCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$filter', 'leafletData', 'Map', 'toolbox', ($scope, $rootScope, $location, $timeout, $filter, leafletData, Map, toolbox) ->
         $scope.map = Map
+        $scope.toolbox = toolbox
+  
+        $scope.canvasIsLoading = false
+        $scope.canvasNewImage = null
+        canvas = new fabric.Canvas('snapshot-canvas', toolbox.tools.canvas.default);
+
         map = null # Leaflet Map instance
         cartodbLayer = null
-        $scope.canvasIsLoading = false
-        legendCanvas = null
 
         $scope.papers =[
             {'name': 'A0', 'class': 'a0'}
@@ -30,69 +34,218 @@ angular.module('mapPrinterApp')
             {'name': 'A5 Landscape', 'class': 'a5-landscape'}
         ]
 
-        $scope.textStyles = [
-            'normal'
-            'bold'
-            'italic'
-            'italic bold'
-        ]
-
-        $scope.positions = [
-            'topleft'
-            'topright'
-            'bottomleft'
-            'bottomright'
-        ]
+        defaults =
+            paper: 8
 
         urlParams = $location.search()
         $scope.centerUrlHash = ''
-        $scope.snapshotURL = null
-        defaultLegendEntry = color: '#000000', label: ''
-        $scope.legendEntry = angular.copy(defaultLegendEntry)
-
-        ctx = null
-        canvas = null
-        defaults =
-            paper: 8
+        $scope.canvasDataURL = null
 
         leafletData.getMap('map').then((_map) ->
             map = _map
             refreshMapStyle()
         )
 
-        $scope.print = () ->
-          $scope.canvasIsLoading = true
-          $scope.snapshotURL = null
-          document.getElementById('snapshot').innerHTML = ''
-          leafletImage map, (err, _canvas) ->
-            # now you have canvas
-            # example thing to do with that canvas:
-            canvas = _canvas
-            img = document.createElement('img')
+        $scope.canvasOnToolClicked = (tool) ->
+            toolbox.activeObject = null
+            canvas.deactivateAll().renderAll()
+            newObj = null
+            # Activate drawing mode if freehand is selected
+            if tool is 'path'
+                canvas.freeDrawingBrush.color = toolbox.tools.path.default.stroke
+                canvas.freeDrawingBrush.width = toolbox.tools.path.default.strokeWidth
+                canvas.isDrawingMode = true
+            else
+                canvas.isDrawingMode = false
+            if tool is toolbox.activeTool
+                # Create selected tool object
+                switch tool
+                    when 'textbox'
+                        newObj = new fabric.Textbox(toolbox.tools.textbox.default.text, toolbox.tools['textbox'].default)
+                    when 'rect'
+                        newObj = new fabric.Rect toolbox.tools.rect.default
+                    when 'circle'
+                        newObj = new fabric.Circle toolbox.tools.circle.default
+                    when 'path'
+                        canvas.isDrawingMode = false
+                        toolbox.activeTool = null
+                    when 'image', 'canvas'
+                        toolbox.activeTool = null
+            else
+                # Set active tool
+                toolbox.activeTool = tool
+            if newObj?
+                newObj.set( {id: "#{ newObj.type }-#{ Date.now() }"} )
+                canvas.add(newObj)
+                canvas.setActiveObject(newObj)
+
+        $scope.canvasDeleteObject = (id) ->
+            obj = _.findWhere(canvas.getObjects(), {id: id})
+            if obj?
+                obj.remove()
+            if toolbox.activeObject? and toolbox.activeObject.id == id
+                toolbox.activeObject = null
+            canvas.renderAll()
+
+        $scope.canvasLevelObject = (level) ->
+            obj = canvas.getActiveObject()
+            if obj?
+                switch level
+                    when 'top'
+                        obj.bringToFront()
+                    when 'bottom'
+                        obj.sendToBack()
+                    when 'raise'
+                        obj.bringForward()
+                    when 'lower'
+                        obj.sendBackwards()
+
+        $scope.initializeCanvas = () ->
+            $scope.canvasIsLoading = true
+            $scope.canvasDataURL= null
+            canvas.clear()
             dimensions = map.getSize()
-            img.width = dimensions.x
-            img.height = dimensions.y
-            ctx = canvas.getContext("2d")
+            canvas.setHeight(dimensions.y)
+            canvas.setWidth(dimensions.x)
+            canvas.on 'object:modified', (e) ->
+                _.debounce refreshCanvasScope(e), 1000
+            canvas.on 'text:changed', (e) ->
+                _.debounce refreshCanvasScope(e), 1000
+            canvas.on 'path:created', (e) ->
+                e.path.set( {id: "path-#{ Date.now() }"} )
+                canvas.setActiveObject(e.path)
+            canvas.on 'object:selected', (e) ->
+                $timeout ->
+                    if e.target.type in _.keys(toolbox.tools)
+                        kys = _.keys(toolbox.tools[e.target.type].properties)
+                        obj = _.pick(e.target.toObject(kys), kys)
+                        toolbox.activeObject = obj
+                        toolbox.activeTool = obj.type
+                    else
+                        toolbox.activeObject = null
+                        toolbox.activeTool = null
+            canvas.on 'object:scaling', (e) ->
+                target = e.target
+                if target.type in ['rect']
+                    sX = target.scaleX
+                    sY = target.scaleY
+                    target.width *= sX
+                    target.height *= sY
+                    target.scaleX = 1
+                    target.scaleY = 1
+                        
+            leafletImage map, (err, mapCanvas) ->
+                # now you have canvas
+                $scope.canvasIsLoading = false
+                canvasAddImage mapCanvas.toDataURL()
+                $timeout ->
+                    # force #snapshot .modal-backdrop to reach beyond window height if necessary
+                    window.dispatchEvent(new Event('resize'));
+                    if $scope.map.tiles.default.options.attribution
+                        # add attribution
+                        attribution = new fabric.Textbox(
+                            $scope.map.tiles.default.options.attribution,
+                            {fontSize: 11, width: 200, left: canvas.width-200})
+                        attribution.set {top: canvas.height-attribution.height - 10}
+                        canvas.add(attribution)
+                        canvas.renderAll()
+                , 1000
+            canvas.renderAll()
 
-            # draw map components on canvas
-            writeOnCanvas($scope.map.title.text, $scope.map.title)
-            writeOnCanvas($scope.map.tiles.default.options.attribution, $scope.map.attribution)
-            drawOnCanvas(legendCanvas, $scope.map.legend)
+        $scope.downloadCanvas = () ->
+            canvas.deactivateAll().renderAll()
+            $scope.canvasDataURL = canvas.toDataURL()
+            toolbox.activeObject = null
 
-            img.src = canvas.toDataURL()
-            $scope.snapshotURL = img.src
-            $scope.canvasIsLoading = false
-            document.getElementById('snapshot').innerHTML = ''
-            document.getElementById('snapshot').appendChild img
-            # force #snapshot .modal-backdrop to reach beyond window height if necessary
-            $timeout ->
-                window.dispatchEvent(new Event('resize'));
-            , 1000
+        $scope.printCanvas = () ->
+            canvas.deactivateAll().renderAll()
+            $scope.canvasDataURL = canvas.toDataURL()
+            imagepage = "
+                <!DOCTYPE html>
+                <html>
+                <head><title></title></head>
+                <body onload='window.focus(); window.print(); window.close();'>
+                <img src='#{ $scope.canvasDataURL }' style='width: 100%;' />
+                </body>
+                </html>
+                "
+            printWindow = window.open('', 'print')
+            printWindow.document.open()
+            printWindow.document.write(imagepage)
+            printWindow.document.close()
+            printWindow.focus()
 
-        $scope.$on 'centerUrlHash', (event, centerHash) ->
-            $scope.centerUrlHash = centerHash
-            refreshUrlParams()
-            return
+        refreshMapStyle = () ->
+            if map?
+                if cartodbLayer?
+                    map.removeLayer(cartodbLayer)
+                if $scope.map.cartodb.vis? and $scope.map.cartodb.vis != ''
+                    cartodb.createLayer(map, $scope.map.cartodb.vis, $scope.map.cartodb.options).addTo(map)
+                      .on 'done', (layer) ->
+                        cartodbLayer = layer
+                      .on 'error', ->
+                        console.log 'error adding cartodb layer'
+
+        refreshCanvasScope = (e) ->
+            if e? and toolbox.activeObject? and e.target.id == toolbox.activeObject.id
+                kys = _.keys(toolbox.tools[e.target.type].properties)
+                obj = _.pick(e.target.toObject(kys), kys)
+                toolbox.activeObject = obj
+
+        canvasAddImage = (data) ->
+            fabric.Image.fromURL data, (oImg) ->
+                canvasBaseImg = oImg
+                canvasBaseImg.set(toolbox.tools.image.default)
+                canvasBaseImg.set({id: "image-#{ Date.now() }", type: 'image'})
+                canvas.add(canvasBaseImg)
+                canvas.setActiveObject(canvasBaseImg)
+                refreshCanvasScope()
+
+        readUrlParams = () ->
+            urlParams = $location.search()
+            if urlParams.p? and $filter('filter')($scope.papers, {class: urlParams.p})[0]?
+                $scope.paper = urlParams.p
+            else
+                $scope.paper = $scope.papers[defaults.paper].class
+            if urlParams.u?
+                $scope.map.tiles.default.url = urlParams.u
+            # cartodb
+            if urlParams.cu?
+                $scope.map.cartodb.vis = urlParams.cu
+            # attribution
+            if urlParams.a?
+                $scope.map.tiles.default.options.attribution = urlParams.a
+        readUrlParams()
+
+        refreshUrlParams = () ->
+            urlParams = $location.search()
+            urlParams.c = $scope.centerUrlHash
+            urlParams.p = $scope.paper
+            # cartodb
+            urlParams.cu = $scope.map.cartodb.vis
+            # attribution
+            urlParams.a = $scope.map.tiles.default.options.attribution
+            $location.search urlParams
+
+        # watchdogs
+        $scope.$watch 'toolbox.activeObject', ((newVal, oldVal) ->
+            if newVal?
+                obj = _.findWhere(canvas.getObjects(), {id: newVal.id})
+            if obj?
+                obj.setOptions(newVal)
+                canvas.renderAll()
+        ), true
+
+        $scope.$watch 'canvasNewImage', ((newVal, oldVal) ->
+            if newVal?
+                canvasAddImage(newVal)
+        )
+
+        $scope.$watch 'toolbox.canvasProperties', ((newVal, oldVal) ->
+            if canvas? and newVal?
+               canvas.setBackgroundColor newVal.backgroundColor
+               canvas.renderAll()
+        ), true
 
         $scope.$watch 'paper', ((newVal, oldVal) ->
             try
@@ -108,305 +261,16 @@ angular.module('mapPrinterApp')
 
         $scope.$watchGroup [
                 'map.tiles.default.url'
-                'map.tiles.default.options.attribution'
                 'map.cartodb.vis'
-                'map.attribution.size'
-                'map.attribution.font'
-                'map.attribution.style'
-                'map.attribution.color'
-                'map.attribution.position'
-                'map.title.text'
-                'map.title.size'
-                'map.title.font'
-                'map.title.style'
-                'map.title.color'
-                'map.title.position'
-                'map.legend.size'
-                'map.legend.font'
-                'map.legend.style'
-                'map.legend.color'
-                'map.legend.background'
-                'map.legend.position'
+                'map.tiles.default.options.attribution'
             ],((newVal, oldVal) ->
-                buildLegend()
                 refreshUrlParams()
                 refreshMapStyle()
         )
 
-        $scope.$watch 'map.legend.items', ((newVal, oldVal) ->
-            buildLegend()
+        $scope.$on 'centerUrlHash', (event, centerHash) ->
+            $scope.centerUrlHash = centerHash
             refreshUrlParams()
-            refreshMapStyle()
-        ), true
+            return
 
-        $scope.printSnapshot = () ->
-            imagepage = "
-                <!DOCTYPE html>
-                <html>
-                <head><title></title></head>
-                <body onload='window.focus(); window.print(); window.close();'>
-                <img src='#{ $scope.snapshotURL }' style='width: 100%;' />
-                </body>
-                </html>
-                "
-            printWindow = window.open('', 'print')
-            printWindow.document.open()
-            printWindow.document.write(imagepage)
-            printWindow.document.close()
-            printWindow.focus()
-
-        readUrlParams = () ->
-            urlParams = $location.search()
-            if urlParams.p? and $filter('filter')($scope.papers, {class: urlParams.p})[0]?
-                $scope.paper = urlParams.p
-            else
-                $scope.paper = $scope.papers[defaults.paper].class
-            if urlParams.u?
-                $scope.map.tiles.default.url = urlParams.u
-            # cartodb
-            if urlParams.cu?
-                $scope.map.cartodb.vis = urlParams.cu
-            # title
-            if urlParams.t?
-                $scope.map.title.text = urlParams.t
-            if parseInt(urlParams.ts)
-                $scope.map.title.size = parseInt(urlParams.ts)
-            if urlParams.tf?
-                $scope.map.title.font = urlParams.tf
-            if urlParams.tt? and urlParams.tt in $scope.textStyles
-                $scope.map.title.style = urlParams.tt
-            if urlParams.tc?
-                $scope.map.title.color = urlParams.tc
-            if urlParams.tp? and urlParams.tp in $scope.positions
-                $scope.map.title.position = urlParams.tp
-            # attribution
-            if urlParams.a?
-                $scope.map.tiles.default.options.attribution = urlParams.a
-            if parseInt(urlParams.as)
-                $scope.map.attribution.size = parseInt(urlParams.as)
-            if urlParams.af?
-                $scope.map.attribution.font = urlParams.af
-            if urlParams.at? and urlParams.at in $scope.textStyles
-                $scope.map.attribution.style = urlParams.at
-            if urlParams.ac?
-                $scope.map.attribution.color = urlParams.ac
-            if urlParams.ap? and urlParams.ap in $scope.positions
-                $scope.map.attribution.position = urlParams.ap
-            # legend
-            if parseInt(urlParams.ls)
-                $scope.map.legend.size = parseInt(urlParams.ls)
-            if urlParams.lf?
-                $scope.map.legend.font = urlParams.lf
-            if urlParams.lt? and urlParams.lt in $scope.textStyles
-                $scope.map.legend.style = urlParams.lt
-            if urlParams.lc?
-                $scope.map.legend.color = urlParams.lc
-            if urlParams.lb?
-                $scope.map.legend.background = urlParams.lb
-            if urlParams.lp? and urlParams.lp in $scope.positions
-                $scope.map.legend.position = urlParams.lp
-            if urlParams.li?
-                $scope.map.legend.items = JSON.parse(decodeURIComponent(urlParams.li))
-        readUrlParams()
-
-        refreshUrlParams = () ->
-            urlParams = $location.search()
-            urlParams.c = $scope.centerUrlHash
-            urlParams.p = $scope.paper
-            urlParams.u = $scope.map.tiles.default.url
-            # cartodb
-            urlParams.cu = $scope.map.cartodb.vis
-            # title
-            urlParams.t = $scope.map.title.text
-            urlParams.ts = $scope.map.title.size
-            urlParams.tf = $scope.map.title.font
-            urlParams.tt = $scope.map.title.style
-            urlParams.tc = $scope.map.title.color
-            urlParams.tp = $scope.map.title.position
-            # attribution
-            urlParams.a = $scope.map.tiles.default.options.attribution
-            urlParams.as = $scope.map.attribution.size
-            urlParams.af = $scope.map.attribution.font
-            urlParams.at = $scope.map.attribution.style
-            urlParams.ac = $scope.map.attribution.color
-            urlParams.ap = $scope.map.attribution.position
-            # legend
-            urlParams.ls = $scope.map.legend.size
-            urlParams.lf = $scope.map.legend.font
-            urlParams.lt = $scope.map.legend.style
-            urlParams.lc = $scope.map.legend.color
-            urlParams.lb = $scope.map.legend.background
-            urlParams.lp = $scope.map.legend.position
-            urlParams.li = encodeURIComponent(JSON.stringify($scope.map.legend.items))
-            $location.search urlParams
-
-        refreshMapStyle = () ->
-            if map?
-                map.titleControl.addTitle($scope.map.title.text)
-                map.titleControl.setPosition($scope.map.title.position)
-                map.legendControl.addLegend($scope.map.legend.text)
-                map.legendControl.setPosition($scope.map.legend.position)
-                buildLegend()
-                if cartodbLayer?
-                    map.removeLayer(cartodbLayer)
-                if $scope.map.cartodb.vis? and $scope.map.cartodb.vis != ''
-                    cartodb.createLayer(map, $scope.map.cartodb.vis, $scope.map.cartodb.options).addTo(map)
-                      .on 'done', (layer) ->
-                        cartodbLayer = layer
-                      .on 'error', ->
-                        console.log 'error adding cartodb layer'
-                map.attributionControl.setPrefix('')
-                map.attributionControl.setPosition($scope.map.attribution.position)
-            $rootScope.mapCss = "
-            .leaflet-container .leaflet-control-attribution{
-                background-color: none;
-                background: none;
-                font-size: #{ $scope.map.attribution.size }px;
-                font-style: #{ $scope.map.attribution.style };
-                font-family: #{ $scope.map.attribution.font };
-                color: #{ $scope.map.attribution.color };
-            }
-            .leaflet-container .leaflet-control-title{
-                background-color: none;
-                background: none;
-                font-size: #{ $scope.map.title.size }px;
-                font-style: #{ $scope.map.title.style };
-                font-family: #{ $scope.map.title.font };
-                color: #{ $scope.map.title.color };
-            }
-            "
-            if $scope.map.title.style.indexOf('bold') > -1
-                $rootScope.mapCss += "
-                .leaflet-container .leaflet-control-title{
-                    font-weight: bold;
-                }
-                "
-            if $scope.map.title.style.indexOf('italic') > -1
-                $rootScope.mapCss += "
-                .leaflet-container .leaflet-control-title{
-                    font-style: italic;
-                }
-                "
-            if $scope.map.attribution.style.indexOf('bold') > -1
-                $rootScope.mapCss += "
-                .leaflet-container .leaflet-control-attribution{
-                    font-weight: bold;
-                }
-                "
-            if $scope.map.attribution.style.indexOf('italic') > -1
-                $rootScope.mapCss += "
-                .leaflet-container .leaflet-control-attribution{
-                    font-style: italic;
-                }
-                "
-
-        writeOnCanvas = (text, options) ->
-            try
-                ctx.font = "#{ options.style } #{ options.size }px #{ options.font }"
-                ctx.fillStyle = options.color
-                corners =
-                    'topleft':
-                        x: 10
-                        y: 10
-                    'topright':
-                        x: canvas.width-10
-                        y: 10
-                    'bottomleft':
-                        x: 10
-                        y: canvas.height - 10
-                    'bottomright':
-                        x: canvas.width - 10
-                        y: canvas.height - 10
-                textAlignPosition =
-                    'topleft': 'start'
-                    'topright': 'end'
-                    'bottomleft': 'start'
-                    'bottomright': 'end'
-                textBaselinePosition =
-                    'topleft': 'top'
-                    'topright': 'top'
-                    'bottomleft': 'bottom'
-                    'bottomright': 'bottom'
-                ctx.textAlign = textAlignPosition[options.position]
-                ctx.textBaseline=textBaselinePosition[options.position]
-                coords = corners[options.position]
-                ctx.fillText(text, coords.x, coords.y)
-            catch e
-                console.log e
-
-        drawOnCanvas = (el, options) ->
-            try
-                corners =
-                    'topleft':
-                        x: 10
-                        y: 10
-                    'topright':
-                        x: canvas.width - el.width
-                        y: 10
-                    'bottomleft':
-                        x: 10
-                        y: canvas.height - el.height
-                    'bottomright':
-                        x: canvas.width - el.width
-                        y: canvas.height - el.height
-                coords = corners[options.position]
-                ctx.drawImage(el, coords.x, coords.y)
-            catch e
-                console.log e
-
-        $scope.addLegendEntry = () ->
-            $scope.map.legend.items.push(angular.copy($scope.legendEntry))
-            $scope.legendEntry = angular.copy(defaultLegendEntry)
-
-        $scope.removeLegendEntry = (i) ->
-            $scope.map.legend.items.splice(i, 1);
-
-        buildLegend = () ->
-            # generate content
-            _legend = ''
-            extraStyle = {}
-            if $scope.map.legend.style.indexOf('bold') > -1
-                extraStyle['font-weight'] = 'bold'
-            if $scope.map.legend.style.indexOf('italic') > -1
-                extraStyle['font-style'] = 'italic'
-            for item in $scope.map.legend.items
-                _legend += "
-                <div style='padding: 5px 10px'>
-                    <i
-                        style='
-                            background-color:#{ item.color };
-                            width: 25px;
-                            height: 18px;
-                            display: inline-block;
-                            vertical-align: middle
-                        '>
-                    </i>
-                    <span
-                            style='padding: 4px;
-                            font-style: #{ extraStyle['font-style'] };
-                            font-weight: #{ extraStyle['font-weight'] };'>
-                        #{ item.label }
-                    </span><br>
-                </div>
-                "
-            $scope.map.legend.text = "
-            <div
-                style='
-                background-color: none;
-                background: #{ $scope.map.legend.background };
-                font-size: #{ $scope.map.legend.size }px;
-                font-style: #{ $scope.map.legend.style };
-                font-family: #{ $scope.map.legend.font };
-                color: #{ $scope.map.legend.color };
-                border-radius: 3px;'
-                class='leaflet-control-legend-container'>
-                #{ _legend }
-            </div>
-            "
-            if map?
-                legendCanvas = document.getElementById('_legend-canvas')
-                legendCanvas.width = map.legendControl.getContainer().offsetWidth + 20
-                legendCanvas.height = map.legendControl.getContainer().offsetHeight + 20
-                legendCtx = legendCanvas.getContext("2d")
-                rasterizeHTML.drawHTML($scope.map.legend.text, legendCanvas)
     ]
