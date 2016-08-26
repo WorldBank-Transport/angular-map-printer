@@ -2,6 +2,16 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 // bower:scss
 // endbower
 
+$gray-base: #000;
+$gray-base-light: #171B20;
+$gray-darker: #272B30;
+$gray-dark: #3A3F44;
+$gray: #52575C;
+$gray-light: #7A8288;
+$gray-lighter: #999;
+
+$gray-dark-border: 1px solid $gray-base;
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
@@ -14,6 +24,9 @@ body, html {
   padding-top: 0;
   padding-bottom: 0;
   height: 100%;
+}
+body{
+    padding-top: 50px;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -35,6 +48,10 @@ body, html {
     line-height: 40px;
     padding-bottom: 19px;
   }
+}
+
+.navbar-brand {
+    padding: 5px 15px;
 }
 
 /* Custom page footer */
@@ -129,19 +146,23 @@ body, html {
     height: 148mm;
     width: 210mm
 }
+#map-container-wrapper{
+    overflow: auto;
+    pading: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
 #map-container{
     display: block;
-    margin: 10px auto;
+    margin: auto;
+    overflow: auto;
 }
 
 #toolbox{
-    position: fixed;
-    top: 0;
     right: 5px;
-    min-width: 20%;
-    max-width: 320px;
-    overflow-y: scroll;
-    z-index: 1000
+    overflow-y: auto;
+    z-index: 1000;
+    max-height: 100%;
 }
 
 #print-preview img{
@@ -226,6 +247,33 @@ fieldset[disabled] .form-control{
   .jumbotron {
     border-bottom: 0;
   }
+  .modal-lg {
+    width: 95%;
+  }
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-corner {
+    background-color: $gray-base;
+}
+::-webkit-scrollbar-track {
+    background-color: $gray-base-light;
+    border: $gray-dark-border;
+}
+::-webkit-scrollbar-thumb {
+    background-color: $gray-darker;
+    border: $gray-dark-border;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: $gray-darker;
+}
+
+.canvas-container{
+    margin: auto;
+    overflow: auto;
+    max-width: 100%;
 }
 
 @media print {

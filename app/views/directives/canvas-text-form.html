@@ -1,0 +1,82 @@
+<form class="form-horizontal">
+    <div class="form-group">
+        
+        <textarea class="form-control input-sm" ng-model="_model.text">
+        </textarea>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon">font</div>
+            <jd-fontselect stack="_model.fontFamily" ng-dbclick="toggle($event)"/>
+        </div>
+        <div class="input-group">
+            <div class="input-group-addon">font size</div>
+            <input class="form-control input-sm" type="number" step="1" ng-model="_model.fontSize">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon">text color</div>
+            <input class="form-control input-sm btn btn-sm" type="text"
+                colorpicker="rgba" colorpicker-position="top"
+                ng-model="_model.fill"
+                style="background-color: {{ _model.fill }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon">background color</div>
+            <input class="form-control input-sm btn btn-sm" type="text"
+                colorpicker="rgba"
+                ng-model="_model.backgroundColor"
+                style="background-color: {{ _model.backgroundColor }}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <button class="btn btn-default btn-xs"
+                    ng-click="bold()"
+                    ng-class="{'active': _model.fontWeight == 'bold'}">
+                <strong><i class="fa fa-bold"></i></strong>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="italic()"
+                    ng-class="{'active': _model.fontStyle == 'italic'}">
+                <i class="fa fa-italic"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textDecoration('underline')"
+                    ng-class="{'active': _model.textDecoration == 'underline'}">
+                <i class="fa fa-underline"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textDecoration('line-through')"
+                    ng-class="{'active': _model.textDecoration == 'line-through'}">
+                <i class="fa fa-strikethrough"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textAlign('left')"
+                    ng-class="{'active': _model.textAlign == 'left'}">
+                <i class="fa fa-align-left"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textAlign('right')"
+                    ng-class="{'active': _model.textAlign == 'right'}">
+                <i class="fa fa-align-right"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textAlign('center')"
+                    ng-class="{'active': _model.textAlign == 'center'}">
+                <i class="fa fa-align-center"></i>
+            </button>
+            <button class="btn btn-default btn-xs"
+                    ng-click="textAlign('justify')"
+                    ng-class="{'active': _model.textAlign == 'justify'}">
+                <i class="fa fa-align-justify"></i>
+            </button>
+        </div>
+    </div>
+</form>
