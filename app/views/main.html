@@ -100,6 +100,7 @@
                 <div class="btn-group btn-group-sm canvas-tools-buttons">
                     <button ng-repeat='(toolType, tool) in toolbox.tools'
                             class="btn btn-link"
+                            data-toggle="tooltip" title="{{ tool.title }}"
                             ng-disabled="canvasIsLoading"
                             ng-click="canvasOnToolClicked(toolType)">
                         <i class="fa {{ tool.icon }} fa-lg" ng-class="{'text-info': toolType==toolbox.activeTool}"></i>

@@ -214,7 +214,7 @@ angular.module 'mapPrinterApp'
                         type: 'string'
                         title : 'type'
                 icon: 'fa-hand-pointer-o'
-                title: 'hand'
+                title: 'pointer'
                 default: {}
 
             }
