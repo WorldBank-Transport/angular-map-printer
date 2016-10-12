@@ -221,6 +221,7 @@ angular.module('mapPrinterApp')
             urlParams = $location.search()
             urlParams.c = $scope.centerUrlHash
             urlParams.p = $scope.paper
+            urlParams.u = $scope.map.tiles.default.url
             # cartodb
             urlParams.cu = $scope.map.cartodb.vis
             # attribution
